@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Selecionando múltiplos elementos</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+</head>
+
+<body>
+
+<div></div>
+<div></div>
+<div></div>
+
+<script type="text/javascript">
+    d3.selectAll("div") 
+        .attr("class", "blue box")
+        .each(function (d, i) { 
+                d3.select(this).append("h1").style("color","white").text(i);
+                d3.select(this).style("background-image", "url('https://media.tenor.com/images/00760d23371272db216da7919ce7c884/tenor.gif')")
+                d3.select(this).style("background-color", "red")
+                
+                d3.select(this).append("svg")
+                			   .attr("width", "200")
+                			   .attr("height", "100")
+                			   .attr("class", "bola")
+                			   
+                d3.selectAll(".bola").append("circle")
+                				  .attr("cx", "100")
+                				  .attr("cy", "50")
+                				  .attr("r", "20")
+                				  .attr("fill", "white")
+                				  .attr("stroke", "gray")
+                				  .attr("stroke-width", "2")
+            });
+</script>
+
+</body>
+</html>
