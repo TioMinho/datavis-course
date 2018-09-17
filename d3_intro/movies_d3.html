@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Dataset de Filmes - Exercício</title>
+	<link rel="stylesheet" href="css/styles.css">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="js/jquery-3.3.1.min.js"></script>
+    <script src="js/script.js"></script>
+</head>
+<body>
+	<!-- Título no Body -->
+	<h2 align="center">Bar Chart Analysis - Movies</h2>
+
+	<!-- Div para Inserção do Gráfico -->
+	<div class="box">
+		<div class="chart" id="chart_1"></div>
+		<div class="chart" id="chart_2"></div>
+	</div>
+	<div class="box">
+		<div class="chart" id="chart_3"></div>
+	</div>
+	
+
+	<!-- Scripts do D3 -->
+    <script type="text/javascript">
+
+       	function render(dataset, title, position, color, order) {
+    		// Variáveis Importantes
+    		let w = $("#chart_"+position).width();
+    		let h = $("#chart_"+position).height();
+    		let size = Object.keys(dataset).length;
+
+    		// Declara as funções de escala linear
+            let xScale = d3.scaleLinear()
+            			   .domain([0, d3.max(dataset, function(d){ 
+            			   		if(position == 1)
+            			   			return d["Worldwide_Gross_M"];
+            			   		else if(position == 2)
+            			   			return d["Budget_M"];
+            			   		else if(position == 3)
+            			   			return d["Worldwide_Gross_M"]-d["Budget_M"]; 
+            			   	}) ])
+            			   .range([0, w]);
+
+            let colorScale = d3.scaleLinear()
+	        	.domain([0, d3.max(dataset, function(d) { 
+	        					if(position == 1)
+            			   			return d["Worldwide_Gross_M"];
+            			   		else if(position == 2)
+            			   			return d["Budget_M"];
+            			   		else if(position == 3)
+            			   			return d["Worldwide_Gross_M"]-d["Budget_M"]; 
+            			   	})
+	        	])
+	        	.range(color);
+
+			d3.select("#chart_"+position).append("text")
+            	.attr("class", "title")
+				.text(title);
+
+            d3.select("#chart_"+position).selectAll("div.h-bar")
+                    .data(dataset)
+                .enter().append("div")
+                .attr("class", "h-bar")
+                .append("span");
+            
+            d3.select("#chart_"+position).selectAll("div.h-bar")
+                    .data(dataset)
+                .attr("class", "h-bar")
+                .style("width", function (d) {
+                	if(position == 1)
+			   			return xScale(d["Worldwide_Gross_M"]) + "px";
+			   		else if(position == 2)
+			   			return xScale(d["Budget_M"]) + "px";
+			   		else if(position == 3)
+			   			return xScale(d["Worldwide_Gross_M"]-d["Budget_M"]) + "px"; 
+                })
+                .style("height", (h/size)-3.5+"px")
+                .style("background-color", function(d){
+                    if(position == 1)
+			   			return colorScale(d["Worldwide_Gross_M"]);
+			   		else if(position == 2)
+			   			return colorScale(d["Budget_M"]);
+			   		else if(position == 3)
+			   			return colorScale(d["Worldwide_Gross_M"]-d["Budget_M"]);
+                })
+                .select("span")
+                	.text(function(d){
+                		if(position == 1)
+				   			return d["Worldwide_Gross_M"];
+				   		else if(position == 2)
+				   			return d["Budget_M"];
+				   		else if(position == 3)
+				   			return d["Film"];
+                	});
+
+            d3.select("#chart_"+position).selectAll("div.h-bar") 
+                .sort(function(x,y) {
+                	if(position == 1) {
+	                	if(order=="asc")
+	                		return d3.ascending(x["Worldwide_Gross_M"], y["Worldwide_Gross_M"]);
+	                	else
+	                		return d3.descending(x["Worldwide_Gross_M"], y["Worldwide_Gross_M"]);
+                	} else if(position == 2) {
+                		if(order=="asc")
+	                		return d3.ascending(x["Budget_M"], y["Budget_M"]);
+	                	else
+	                		return d3.descending(x["Budget_M"], y["Budget_M"]);
+	                } else if(position == 3) {
+                		if(order=="asc")
+	                		return d3.ascending(x["Worldwide_Gross_M"]-x["Budget_M"], y["Worldwide_Gross_M"]-y["Budget_M"]);
+	                	else
+	                		return d3.descending(x["Worldwide_Gross_M"]-x["Budget_M"], y["Worldwide_Gross_M"]-y["Budget_M"]);
+	                }
+                });	
+        }
+        d3.json("data/movies.json").then(function(json){
+            render(json,"Bilheteria (em Milhões)", 1, ["#52a552", "#244924"], "desc");
+            render(json,"Orçamento (em Milhões)", 2, ["#d9534f", "#56211f"], "asc");
+            render(json,"Ordem de Filmes Mais Lucrativos", 3, ["#428bca", "#13293c"], "desc");
+        });
+    </script>
+
+</body>
+</html>
