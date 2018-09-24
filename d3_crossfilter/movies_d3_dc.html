@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Bilheteria de Filmes por Ano e Gênero</title>
+    <link rel="stylesheet" href="css/dc.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/crossfilter.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="js/dc.min.js"></script>
+
+</head>
+<body>
+     <div><h1>Bilheteria de Filmes por Ano e Gênero</h1>
+        <div id="chart_1"></div>
+        <div id="chart_2"></div>
+    </div>
+    <script type="text/javascript">
+        let lineChart_1 = dc.lineChart('#chart_1');
+        let lineChart_2 = dc.lineChart('#chart_2');
+
+        d3.json("data/movies.json").then(function(data){
+            //criando um crossfilter
+            let facts = crossfilter(data);
+
+            let yearDim = facts.dimension(function(d){
+                return d.Year;
+            });
+
+            let genreDim = facts.dimension(function(d){
+                return d.Genre;
+            });
+
+            let grossByYearGroup = yearDim.group().reduceSum(function(d){
+                return d.Worldwide_Gross_M;
+            });
+
+            let budgetByGenreGroup = genreDim.group().reduceSum(function(d){
+                return d.Worldwide_Gross_M;
+            });
+
+            let xScale_1 = d3.scaleLinear()
+                           .domain([yearDim.bottom(1)[0].Year, yearDim.top(1)[0].Year]);
+
+            let xScale_2 = d3.scaleLinear()
+                           .domain([genreDim.bottom(1)[0].Genre, genreDim.top(1)[0].Genre]);
+
+            lineChart_1.width(800)
+                     .height(400)
+                     .margins({top: 50, right: 50, bottom: 25, left: 40})
+                     .dimension(yearDim)
+                     .x(xScale_1)
+                     .xUnits(d3.timeYears)
+                     .renderHorizontalGridLines(true)
+                     .legend(dc.legend().x(700).y(5).itemHeight(13).gap(5))
+                     .brushOn(false)    
+                     .group(grossByYearGroup, 'Gross');
+
+            lineChart_2.width(800) 
+                     .height(400)
+                     .margins({top: 50, right: 50, bottom: 25, left: 40})
+                     .dimension(genreDim)
+                     .x(xScale_2)
+                     .xUnits(d3.timeYears)
+                     .renderHorizontalGridLines(true)
+                     .legend(dc.legend().x(700).y(5).itemHeight(13).gap(5))
+                     .brushOn(false)    
+                     .group(budgetByGenreGroup, 'Gross');
+
+            dc.renderAll();
+
+        });
+    </script>           
+</body>
+</html>
