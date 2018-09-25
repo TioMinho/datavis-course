@@ -16,8 +16,8 @@
         <div id="chart_2"></div>
     </div>
     <script type="text/javascript">
-        let lineChart_1 = dc.lineChart('#chart_1');
-        let lineChart_2 = dc.lineChart('#chart_2');
+        let barChart_1 = dc.barChart('#chart_1');
+        let barChart_2 = dc.barChart('#chart_2');
 
         d3.json("data/movies.json").then(function(data){
             //criando um crossfilter
@@ -45,27 +45,25 @@
             let xScale_2 = d3.scaleLinear()
                            .domain([genreDim.bottom(1)[0].Genre, genreDim.top(1)[0].Genre]);
 
-            lineChart_1.width(800)
+            barChart_1.width(800)
                      .height(400)
-                     .margins({top: 50, right: 50, bottom: 25, left: 40})
+                     .margins({top: 50, right: 60, bottom: 25, left: 50})
                      .dimension(yearDim)
-                     .x(xScale_1)
-                     .xUnits(d3.timeYears)
                      .renderHorizontalGridLines(true)
-                     .legend(dc.legend().x(700).y(5).itemHeight(13).gap(5))
                      .brushOn(false)    
-                     .group(grossByYearGroup, 'Gross');
+                     .group(grossByYearGroup, 'Gross')
+                     .xUnits(dc.units.ordinal)
+                     .x(d3.scaleBand());;
 
-            lineChart_2.width(800) 
+            barChart_2.width(800) 
                      .height(400)
-                     .margins({top: 50, right: 50, bottom: 25, left: 40})
+                     .margins({top: 50, right: 60, bottom: 25, left: 50})
                      .dimension(genreDim)
-                     .x(xScale_2)
-                     .xUnits(d3.timeYears)
                      .renderHorizontalGridLines(true)
-                     .legend(dc.legend().x(700).y(5).itemHeight(13).gap(5))
                      .brushOn(false)    
-                     .group(budgetByGenreGroup, 'Gross');
+                     .group(budgetByGenreGroup, 'Gross')
+                     .xUnits(dc.units.ordinal)
+                     .x(d3.scaleBand());
 
             dc.renderAll();
 
