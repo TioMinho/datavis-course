@@ -42,8 +42,6 @@
 	let map = L.map('mapid').setView([41.852839689, -87.632970719], 10);
 	L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', { attribution: "Map tiles by Carto, under CC BY 3.0. Data by OpenStreetMap, under ODbL.", maxZoom: 17}).addTo(map);
 
-
-
 	let colorScale = d3.scaleOrdinal()
 						.domain(["HOMICIDE", "ROBBERY", "BURGLARY"])
 						.range(["#a5001a", "#06527e", "#ab7642"]);
@@ -55,7 +53,7 @@
 	// load data from a csv file
 	d3.csv("data/chicago_crimes.csv").then(function (data) {
 	// format our data
-	var parseDate 	= d3.timeParse("%d/%m/%Y %H:%M:%S");
+	var parseDate 	= d3.utcParse("%m/%d/%Y %H:%M:%S");
 
 	data.forEach(function(d){	
 		d.dtg 		= parseDate(d.Date.substr(0,19));
@@ -70,8 +68,6 @@
 
 		circle.bindPopup("<b>Type: </b>" + d.Type + "<br><b>Time: </b>" + d.dtg +
 						"<br><b>Location: </b>" + d.Location)
-
-		console.log(+d.Year)
 	});
 
 	// Run the data through crossfilter and load our 'facts'
@@ -101,11 +97,11 @@
 	// Configure Depth bar graph
 	// 480 x 150
 	// x dimension domain: [0, 100]
-	barChart.width(480)	
+	barChart.width(600)	
         	.height(200)
             .dimension(typeDim)
             .group(typeGroup, "Type")
-            .x(d3.scaleBand())
+            .x(colorScale)
         	.xUnits(dc.units.ordinal)
         	// .colors(d3.scaleOrdinal().range(["#a5001a", "#06527e", "#ab7642"]))
             .renderHorizontalGridLines(true)	
@@ -115,12 +111,10 @@
 	// Configure Time line graph
 	// height: 150
 	//x dimension: build the time scale from the data: d3.time.scale().domain(d3.extent(data, function(d) { return d.dtime; }))
-	lineChart.width(480)
+	lineChart.width(600)
 		   .height(200)
-		   .chart(function(c) { 
-		      return dc.lineChart(c).curve(d3.curveCardinal).evadeDomainFilter(true); 
-		   })
-		   .x(d3.scaleTime().domain([dayDim.bottom(1)[0].dtg, dayDim.top(1)[0].dtg]))
+		   .clipPadding(10)
+		   .x(d3.scaleTime().domain([timeDim.bottom(1)[0].dtg, timeDim.top(1)[0].dtg]))
 		   .elasticY(true)
 		   .brushOn(false)
 		   .dimension(dayDim)
@@ -128,9 +122,9 @@
 		   .colors(d3.scaleOrdinal().range(["#fdae61", "#ca0020", "#0571b0"]))
 		   .renderHorizontalGridLines(true)
 		   .seriesAccessor(function(d) { return d.key[0];})
-		   .keyAccessor(function(d) { return +d.key[1]; })
-		   .valueAccessor(function(d) { return +d.value; })
-		   .legend(dc.legend().x(150).y(125).itemHeight(10).gap(5).horizontal(10).legendWidth(200).itemWidth(85));
+		   .keyAccessor(function(d) { return d.key[1]; })
+		   .valueAccessor(function(d) { return d.value; })
+		   .legend(dc.legend().x(165).y(0).itemHeight(10).gap(5).horizontal(2).legendWidth(400).itemWidth(100));
 
 	// Render the Charts
 	dc.renderAll();
