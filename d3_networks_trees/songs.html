@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title> Similar Songs Network</title>
+    
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+  </head>
+  <body>
+    <main role="main" class="container">
+      <header>
+      <h1>Similar Song Network</h1>
+      <p>Songs similar to one another according to <a href="http://www.last.fm/api">last.fm</a> are linked together. Song nodes are sized based on playcounts, and colored by artist.</p>
+
+      <p>The central song is <b>Lady Gaga - Poker Face</b></p>
+      </header>
+      <div id="main" role="main">
+        <div id="vis"></div>
+      </div>
+      <footer>
+      <p>Data from <a href="http://www.last.fm/api/show/track.getSimilar">last.fm</a>. Some songs include additional links for effect.<br/>Popular songs are defined as those with playcounts above the median for all songs in network. This example is a simpler version of the <a href="http://flowingdata.com/2012/08/02/how-to-make-an-interactive-network-visualization/">tutorial</a> by <a href="http://vallandingham.me/">Jim Vallandingham</a>.</p>
+
+      </footer>
+    </main> <!--! end of #container -->
+    <!-- Bootstrap javascript files -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script>
+        const width = 960;
+        const height = 800;
+
+        const distColors = ["#3957ff", "#d3fe14", "#c9080a", "#fec7f8", "#0b7b3e", "#0bf0e9", "#c203c8", "#fd9b39", "#888593", "#906407", "#98ba7f", "#fe6794", "#10b0ff", "#ac7bff", "#fee7c0", "#964c63", "#1da49c", "#0ad811", "#bbd9fd", "#fe6cfe", "#297192", "#d1a09c", "#78579e", "#81ffad", "#739400", "#ca6949", "#d9bf01", "#646a58", "#d5097e", "#bb73a9", "#ccf6e9", "#9cb4b6", "#b6a7d4", "#9e8c62", "#6e83c8", "#01af64", "#a71afd", "#cfe589", "#d4ccd1", "#fd4109", "#bf8f0e", "#2f786e", "#4ed1a5", "#d8bb7d", "#a54509", "#6a9276", "#a4777a", "#fc12c9", "#606f15", "#3cc4d9", "#f31c4e", "#73616f", "#f097c6", "#fc8772", "#92a6fe", "#875b44", "#699ab3", "#94bc19", "#7d5bf0", "#d24dfe", "#c85b74", "#68ff57", "#b62347", "#994b91", "#646b8c", "#977ab4", "#d694fd", "#c4d5b5", "#fdc4bd", "#1cae05", "#7bd972", "#e9700a", "#d08f5d", "#8bb9e1", "#fde945", "#a29d98", "#1682fb", "#9ad9e0", "#d6cafe", "#8d8328", "#b091a7", "#647579", "#1f8d11", "#e7eafd", "#b9660b", "#a4a644", "#fec24c"];
+
+        console.log(distColors)
+
+        // Create svg element inside #vis element and attribute it to the vis variable
+        let vis = d3.select("#vis")
+                      .append("svg")
+                      .attr("width", width)
+                      .attr("height", height)
+                      .attr("viewBox", [-width / 2, -height / 2, width, height]);
+
+        // Read the contents of data/songs.json file and process it as a graph variable
+        d3.json("data/songs.json").then(function(graph) {
+
+          // Set the nodes and links
+          const nodes = graph.nodes;
+          const links = graph.links;
+
+          // create simulation constant using the forceSimulation function defined down below
+          const simulation = forceSimulation(nodes, links).on("tick", ticked);
+
+          // create link svg elements
+          const link = vis.append("g")
+                         .selectAll("line")
+                         .data(links)
+                         .enter()
+                         .append("line")
+                         .attr("class", "link");
+
+          // create node svg elements
+          let scaleSqrt = d3.scaleSqrt()
+                          .domain([0, d3.max(nodes, function(d){ return d.playcount; })])
+                          .range([2, 20]);
+
+          let colorScale = d3.scaleOrdinal()
+                                  .domain(d3.map(nodes, function(d){ return d.artist;}).keys())
+                                  .range(distColors);
+
+          const node = vis.append("g")
+                         .selectAll("circle")
+                         .data(nodes)
+                         .enter()
+                         .append("circle")
+                         .attr("class", "node")
+                         .attr("fill", function(d) {
+                                      return colorScale(d.artist)+"CF";
+                                   })
+                         .attr("r", function(d) {
+                                      return scaleSqrt(d.playcount);
+                                   })
+                         .call(drag(simulation));
+
+          node.append("title")
+              .text(function (d) {
+                return ""+ d.artist + " - " + d.name
+              });
+
+          // define function ticked
+          function ticked() {
+            node.attr("cx", function(d){
+                        return d.x
+                      })
+                .attr("cy", function(d){
+                        return d.y
+                      });
+
+            link.attr("x1", function(d){
+                        return d.source.x
+                      })
+                .attr("y1", function(d){
+                        return d.source.y
+                      })
+                .attr("x2", function(d){
+                        return d.target.x
+                      })
+                .attr("y2", function(d){
+                        return d.target.y
+                      });
+          }
+
+          // define function drag
+          function drag(simulation){
+            function dragstarted(d) {
+              if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+              d.fx = d.x;
+              d.fy = d.y;
+            }
+
+            function dragged(d) {
+              d.fx = d3.event.x;
+              d.fy = d3.event.y;
+            }
+
+            function dragended(d) {
+              if (!d3.event.active) simulation.alphaTarget(0);
+              d.fx = null;
+              d.fy = null;
+            }
+
+            return d3.drag()
+                      .on("start", dragstarted)
+                      .on("drag", dragged)
+                      .on("end", dragended);
+          }
+
+          // define the forceSimulation function that will receive nodes and links and 
+          // will return a d3.forceSimulation() object 
+          function forceSimulation(nodes, links) {
+            return d3.forceSimulation(nodes)
+                      .force("link", d3.forceLink(links).id(d => d.id).distance(50))
+                      .force("charge", d3.forceManyBody().strength(-50).distanceMax(270))
+                      .force("center", d3.forceCenter());
+          }
+
+        });
+    </script>
+  </body>
+</html>

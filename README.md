@@ -5,6 +5,7 @@
 * (17/09) Introdução ao D3 - Update e Transitions - [Aula](Aulas/Aula_D3_Update/01_scatterplot.html)
 * (24/09) Introdução ao D3 - Crossfilter e DC.js - [Exercício 1](d3_crossfilter/acoes.html) [Exercício 2](d3_crossfilter/movies_d3_dc.html)
 * (26/09) Introdução ao D3 - Crossfilter e DC.js - Parte 2 - [Exercício 1](d3_crossfilter_2/earthquakes.html)
+* (10/10) Introdução ao D3 - Networks e Trees - [Exercício 1](d3_networks_trees/songs.html) [Exercício 2](d3_networks_trees/lesmiserables.html)
 
 ---
 
