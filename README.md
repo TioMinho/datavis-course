@@ -7,6 +7,7 @@
 * (26/09) Introdução ao D3 - Crossfilter e DC.js - Parte 2 - [Exercício 1](d3_crossfilter_2/earthquakes.html)
 * (03/10) Introdução ao D3 - Dados Espaciais e Leaflet - [Exercício 1](d3_crossfilter_2/earthquakes.html) [Exercício 2](d3_crossfilter_2/chicago.html)
 * (10/10) Introdução ao D3 - Networks e Trees - [Exercício 1](d3_networks_trees/songs.html) [Exercício 2](d3_networks_trees/lesmiserables.html)
+* (22/10) Introdução ao D3 - Mapas de Cor - [Exercício 1](d3_color/usa.html) [Exercício 2](d3_color/crimes.html)
 
 ---
 
